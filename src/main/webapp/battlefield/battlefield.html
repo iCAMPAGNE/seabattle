@@ -1,0 +1,23 @@
+<div id="mySea" class="sea">
+      <table>
+        <tr ng-repeat="seaY in seaArray" bin="seaY">
+          <td  droppable ng-repeat="seaX in seaArray" bin="seaX" class="bin" id="cell-{{seaX}}.{{seaY}}" drop="dropped(seaX, seaY)"></td>
+        </tr>
+      </table>
+</div>
+
+<div id="enemySea" class="sea" ng-show="showEnemySea">
+      <table>
+        <tr ng-repeat="seaY in seaArray" bin="seaY">
+          <td ng-repeat="seaX in seaArray" bin="seaX" class="bin" id="cell-{{seaX}}.{{seaY}}" ng-class="plons" ng-click="shoot(seaX,seaY)"></td>
+        </tr>
+      </table>
+</div>
+
+
+<br>
+<input type="button" id="start" value="START" ng-click="start()" ng-show="showStartButton"></input>
+<div class="item undragged" id="item1" draggable item="item">1</div><br><br>
+<div class="item undragged" id="item2" draggable item="item">2</div><br><br>
+<div class="item undragged" id="item3" draggable item="item">3</div><br><br>
+

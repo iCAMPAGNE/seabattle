@@ -1,6 +1,13 @@
 target/
 !.mvn/wrapper/maven-wrapper.jar
 
+logs/*
+!.gitkeep
+node_modules/
+bower_components/
+tmp
+.DS_Store
+
 ### STS ###
 .apt_generated
 .classpath
