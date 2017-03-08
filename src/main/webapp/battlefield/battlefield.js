@@ -8,8 +8,39 @@ app.config(['$routeProvider', function($routeProvider) {
     controller: 'BattlefieldCtrl'
   });
 }])
+        .factory('SeabattleService',
+                ['$http', '$rootScope',
+                    function ($http, $rootScope) {
+                        var service = {};
+                        
+                        var ws = new WebSocket("ws://localhost:8000/socket/");
+                        ws.onopen = function(){  
+                            console.log("Socket has been opened!");  
+                        };
+                        
+                        ws.onmessage = function(message) {
+                        	console.log("Socket message received: " + JSON.parse(message.data));
+                        };
 
-.controller('BattlefieldCtrl', ['$scope', function($scope) {
+                        service.shoot = function (seaX, seaY, callback) {
+
+                            $http({
+                                method: 'GET',
+                                url: '/shoot/frans?seaX=' + seaX + '&seaY=' + seaY
+                            })
+                                    .success(function (response) {
+                                        callback(response);
+                                    }).
+                                    error(function () {
+                                        var result = {error:"Error connecting to host", dataLoading:"false"};
+                                        callback(result);
+                                    });
+
+                        };
+                        return service;
+                }])
+
+.controller('BattlefieldCtrl', ['$scope', 'SeabattleService', function($scope, SeabattleService) {
 	var arrayHorizontal = new Array(8);
 	for (var i = 0; i < arrayHorizontal.length; i++) {
 		arrayHorizontal[i] = i;
@@ -31,10 +62,12 @@ app.config(['$routeProvider', function($routeProvider) {
 	}
 	
 	$scope.shoot = function(x,y) {
-		alert(x + ',' + y);
+		SeabattleService.shoot(x,y, function (response) {
+			alert(response);
+		});
 	}
 	
-	$scope.dropped = function(a,b) {
+	$scope.dropped = function(x,y) {
         var undraggedElements = document.getElementsByClassName("undragged");
         if (undraggedElements.length === 0) {
           	$scope.showStartButton = true;
