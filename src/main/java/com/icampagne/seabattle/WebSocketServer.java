@@ -1,22 +1,39 @@
 package com.icampagne.seabattle;
 
+import java.io.IOException;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
+
 import javax.websocket.OnClose;
 import javax.websocket.OnError;
 import javax.websocket.OnMessage;
 import javax.websocket.OnOpen;
 import javax.websocket.Session;
 import javax.websocket.server.ServerEndpoint;
-import javax.inject.Inject;
 
 @ServerEndpoint("/socket")
 public class WebSocketServer {
-	   
-    @Inject
-    private DeviceSessionHandler sessionHandler;
+
+	// All open WebSocket sessions of players
+    static Set<Session> players = Collections.synchronizedSet(new HashSet<Session>());
+    static Session playerSession;
+    
+    public void shoot(String x, String y) {
+    	
+    	try {
+			playerSession.getBasicRemote().sendText("{x:'" + x + "', y:'" + y + "', status:'1'}");
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+    }
 
 	@OnOpen
-       public void open(Session session) {
-		System.out.println("Websocket OnOpen");
+	public void open(Session session) {
+		players.add(session);
+		playerSession = session;
+		System.out.println("Websocket OnOpen for player " + session.getId());
    }
 
    @OnClose

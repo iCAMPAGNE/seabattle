@@ -4,7 +4,7 @@ var app = angular.module('myApp.battlefield', ['ngRoute']);
 
 app.config(['$routeProvider', function($routeProvider) {
   $routeProvider.when('/battlefield', {
-    templateUrl: 'battlefield/battlefield.html',
+    templateUrl: 'battlefield/battlefield.html?dev=' + Math.floor(Math.random() * 100),
     controller: 'BattlefieldCtrl'
   });
 }])
@@ -13,20 +13,20 @@ app.config(['$routeProvider', function($routeProvider) {
                     function ($http, $rootScope) {
                         var service = {};
                         
-                        var ws = new WebSocket("ws://localhost:8000/socket/");
+                        var ws = new WebSocket("ws://localhost:8080/Seabattle/socket");
                         ws.onopen = function(){  
                             console.log("Socket has been opened!");  
                         };
                         
                         ws.onmessage = function(message) {
-                        	console.log("Socket message received: " + JSON.parse(message.data));
+                        	console.log("Socket message received: " + message.data);
                         };
 
                         service.shoot = function (seaX, seaY, callback) {
 
                             $http({
                                 method: 'GET',
-                                url: '/shoot/frans?seaX=' + seaX + '&seaY=' + seaY
+                                url: '/Seabattle/rest/shoot/frans?seaX=' + seaX + '&seaY=' + seaY
                             })
                                     .success(function (response) {
                                         callback(response);
@@ -41,13 +41,17 @@ app.config(['$routeProvider', function($routeProvider) {
                 }])
 
 .controller('BattlefieldCtrl', ['$scope', 'SeabattleService', function($scope, SeabattleService) {
-	var arrayHorizontal = new Array(8);
-	for (var i = 0; i < arrayHorizontal.length; i++) {
-		arrayHorizontal[i] = i;
+	$scope.seaArray = new Array(4);
+	for (var v = 0; v < $scope.seaArray.length; v++) {
+		$scope.seaArray[v] = new Array(4);
+		for (var h = 0; h < $scope.seaArray[v].length; h++) {
+			$scope.seaArray[v][h] = { status: 0};
+		}
 	}
-	$scope.seaArray = arrayHorizontal;
 	
-	$scope.plons = 'plons';
+	$scope.seaArray[2][2].status = 1;
+	
+	$scope.plons = null;
 	
 	$scope.showStartButton = false;
 	$scope.showEnemySea = false;
@@ -63,7 +67,7 @@ app.config(['$routeProvider', function($routeProvider) {
 	
 	$scope.shoot = function(x,y) {
 		SeabattleService.shoot(x,y, function (response) {
-			alert(response);
+			console.log('Response: ' + response);
 		});
 	}
 	

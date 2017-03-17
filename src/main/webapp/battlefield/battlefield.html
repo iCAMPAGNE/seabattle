@@ -9,7 +9,7 @@
 <div id="enemySea" class="sea" ng-show="showEnemySea">
       <table>
         <tr ng-repeat="seaY in seaArray" bin="seaY">
-          <td ng-repeat="seaX in seaArray" bin="seaX" class="bin" id="cell-{{seaX}}.{{seaY}}" ng-class="plons" ng-click="shoot(seaX,seaY)"></td>
+          <td ng-repeat="seaX in seaY" bin="seaX" class="bin" id="cell-{{seaX}}.{{seaY}}" ng-class="{1:'splash', 0:'water'}[seaX.status]" ng-click="shoot(seaX,seaY)"></td>
         </tr>
       </table>
 </div>

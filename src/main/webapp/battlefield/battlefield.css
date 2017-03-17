@@ -27,9 +27,16 @@
   background: #F0F0F0;
 }
 
+.water {
+	background-color: #EEEEFF;
+}
+
+.splash {
+	background-color: lightblue;
+}
+
 .plons {
 	background-color: lightblue;
-	color:red;
 }
 
 .sea {
