@@ -19,10 +19,10 @@ public class WebSocketServer {
     static Set<Session> players = Collections.synchronizedSet(new HashSet<Session>());
     static Session playerSession;
     
-    public void shoot(String x, String y) {
+    public void shoot(int x, int y) {
     	
     	try {
-			playerSession.getBasicRemote().sendText("{x:'" + x + "', y:'" + y + "', status:'1'}");
+			playerSession.getBasicRemote().sendText("{\"x\":\"" + x + "\", \"y\":\"" + y + "\", \"status\":\"1\"}");
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

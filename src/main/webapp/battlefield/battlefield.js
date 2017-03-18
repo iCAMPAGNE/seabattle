@@ -12,15 +12,6 @@ app.config(['$routeProvider', function($routeProvider) {
                 ['$http', '$rootScope',
                     function ($http, $rootScope) {
                         var service = {};
-                        
-                        var ws = new WebSocket("ws://localhost:8080/Seabattle/socket");
-                        ws.onopen = function(){  
-                            console.log("Socket has been opened!");  
-                        };
-                        
-                        ws.onmessage = function(message) {
-                        	console.log("Socket message received: " + message.data);
-                        };
 
                         service.shoot = function (seaX, seaY, callback) {
 
@@ -45,13 +36,22 @@ app.config(['$routeProvider', function($routeProvider) {
 	for (var v = 0; v < $scope.seaArray.length; v++) {
 		$scope.seaArray[v] = new Array(4);
 		for (var h = 0; h < $scope.seaArray[v].length; h++) {
-			$scope.seaArray[v][h] = { status: 0};
+			$scope.seaArray[v][h] = { status: 0, x:v, y:h};
 		}
 	}
+    
+    var ws = new WebSocket("ws://localhost:8080/Seabattle/socket");
+    ws.onopen = function(){  
+        console.log("Socket has been opened!");  
+    };
+    
+    ws.onmessage = function(message) {
+    	console.log("Socket message received: " + message.data);
+    	var shot = JSON.parse(message.data);
+    	$scope.seaArray[shot.x][shot.y].status = 1;
+    	console.log("schot op " + shot.x + ',' + shot.y);
+    };
 	
-	$scope.seaArray[2][2].status = 1;
-	
-	$scope.plons = null;
 	
 	$scope.showStartButton = false;
 	$scope.showEnemySea = false;
