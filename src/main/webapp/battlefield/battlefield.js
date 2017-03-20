@@ -17,7 +17,7 @@ app.config(['$routeProvider', function($routeProvider) {
 
                             $http({
                                 method: 'GET',
-                                url: '/Seabattle/rest/shoot/frans?seaX=' + seaX + '&seaY=' + seaY
+                                url: '/Seabattle/rest/shoot/' + $rootScope.userId + '?seaX=' + seaX + '&seaY=' + seaY
                             })
                                     .success(function (response) {
                                         callback(response);
@@ -31,7 +31,11 @@ app.config(['$routeProvider', function($routeProvider) {
                         return service;
                 }])
 
-.controller('BattlefieldCtrl', ['$scope', 'SeabattleService', function($scope, SeabattleService) {
+.controller('BattlefieldCtrl', ['$rootScope', '$scope', '$compile', 'SeabattleService', function($rootScope, $scope, $compile, SeabattleService) {
+    $rootScope.userId = Math.floor(100000 * Math.random());
+    console.log($rootScope.userId);
+	
+	
 	$scope.seaArray = new Array(4);
 	for (var v = 0; v < $scope.seaArray.length; v++) {
 		$scope.seaArray[v] = new Array(4);
@@ -39,17 +43,28 @@ app.config(['$routeProvider', function($routeProvider) {
 			$scope.seaArray[v][h] = { status: 0, x:v, y:h};
 		}
 	}
+	
+	$scope.mySeaArray = new Array(4);
+	for (var v = 0; v < $scope.mySeaArray.length; v++) {
+		$scope.mySeaArray[v] = new Array(4);
+		for (var h = 0; h < $scope.mySeaArray[v].length; h++) {
+			$scope.mySeaArray[v][h] = { status: 0, x:v, y:h};
+		}
+	}
     
     var ws = new WebSocket("ws://localhost:8080/Seabattle/socket");
     ws.onopen = function(){  
         console.log("Socket has been opened!");  
+        
+        ws.send($rootScope.userId);
     };
     
     ws.onmessage = function(message) {
     	console.log("Socket message received: " + message.data);
     	var shot = JSON.parse(message.data);
-    	$scope.seaArray[shot.x][shot.y].status = 1;
+    	$scope.mySeaArray[shot.x][shot.y].status = 1;
     	console.log("schot op " + shot.x + ',' + shot.y);
+    	$scope.$apply();
     };
 	
 	
@@ -67,6 +82,7 @@ app.config(['$routeProvider', function($routeProvider) {
 	
 	$scope.shoot = function(x,y) {
 		SeabattleService.shoot(x,y, function (response) {
+	    	$scope.seaArray[x][y].status = 1;
 			console.log('Response: ' + response);
 		});
 	}

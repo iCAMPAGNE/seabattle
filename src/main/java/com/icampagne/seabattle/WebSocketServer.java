@@ -17,12 +17,15 @@ public class WebSocketServer {
 
 	// All open WebSocket sessions of players
     static Set<Session> players = Collections.synchronizedSet(new HashSet<Session>());
-    static Session playerSession;
+    static Session playerSession[] = new Session[2];
+    static boolean firstPlayer = true;
+    static String userId[] = new String[2];
     
-    public void shoot(int x, int y) {
+    public void shoot(String id, int x, int y) {
     	
+		int i = id.equals(userId[0]) ? 1 : 0;
     	try {
-			playerSession.getBasicRemote().sendText("{\"x\":\"" + x + "\", \"y\":\"" + y + "\", \"status\":\"1\"}");
+			playerSession[i].getBasicRemote().sendText("{\"x\":\"" + x + "\", \"y\":\"" + y + "\", \"status\":\"1\"}");
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -32,7 +35,9 @@ public class WebSocketServer {
 	@OnOpen
 	public void open(Session session) {
 		players.add(session);
-		playerSession = session;
+		int i = firstPlayer ? 0 : 1;
+		playerSession[i] = session;
+		firstPlayer = false;
 		System.out.println("Websocket OnOpen for player " + session.getId());
    }
 
@@ -48,6 +53,8 @@ public class WebSocketServer {
 
    @OnMessage
        public void handleMessage(String message, Session session) {
-		System.out.println("Websocket OnMessage");
+		System.out.println("Websocket OnMessage: " + message);
+		int i = session.getId().equals(playerSession[0].getId()) ? 0 : 1;
+		userId[i] = message;
    }
 }
