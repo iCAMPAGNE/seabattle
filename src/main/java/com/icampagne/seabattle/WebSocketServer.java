@@ -18,7 +18,6 @@ public class WebSocketServer {
 	// All open WebSocket sessions of players
     static Set<Session> players = Collections.synchronizedSet(new HashSet<Session>());
     static Session playerSession[] = new Session[2];
-    static boolean firstPlayer = true;
     static String userId[] = new String[2];
     
     public void shoot(String id, int x, int y) {
@@ -34,16 +33,20 @@ public class WebSocketServer {
 
 	@OnOpen
 	public void open(Session session) {
-		players.add(session);
-		int i = firstPlayer ? 0 : 1;
+		int i = playerSession[0] == null || playerSession[1] != null ? 0 : 1;
 		playerSession[i] = session;
-		firstPlayer = false;
 		System.out.println("Websocket OnOpen for player " + session.getId());
    }
 
    @OnClose
        public void close(Session session) {
-		System.out.println("Websocket OnClose");
+		System.out.println("Websocket OnClose session " + session.getId());
+		for (int i = 0; i < playerSession.length; i++) {
+			System.out.println("On close playerSession[" + i + "] = " + playerSession[i].getId());
+			if (session.getId().equals(playerSession[i].getId())) {
+				playerSession[i] = null;
+			}
+		}
    }
 
    @OnError

@@ -13,8 +13,22 @@ app.config(['$routeProvider', function($routeProvider) {
                     function ($http, $rootScope) {
                         var service = {};
 
-                        service.shoot = function (seaX, seaY, callback) {
+                        service.startGame = function (mySea, callback) {
+                            $http({
+                                method: 'POST',
+                                url: '/Seabattle/rest/startGame/' + $rootScope.userId,
+                                data: mySea
+                            })
+                                    .success(function (response) {
+                                        callback(response);
+                                    }).
+                                    error(function () {
+                                        var result = {error:"Error connecting to host", dataLoading:"false"};
+                                        callback(result);
+                                    });
+                        };
 
+                        service.shoot = function (seaX, seaY, callback) {
                             $http({
                                 method: 'GET',
                                 url: '/Seabattle/rest/shoot/' + $rootScope.userId + '?seaX=' + seaX + '&seaY=' + seaY
@@ -26,8 +40,8 @@ app.config(['$routeProvider', function($routeProvider) {
                                         var result = {error:"Error connecting to host", dataLoading:"false"};
                                         callback(result);
                                     });
-
                         };
+
                         return service;
                 }])
 
@@ -76,6 +90,18 @@ app.config(['$routeProvider', function($routeProvider) {
 		  }
 	
 	$scope.start = function() {
+		var mySeaJson = '[';
+		for (var v = 0; v < $scope.mySeaArray.length; v++) {
+			for (var h = 0; h < $scope.mySeaArray[v].length; h++) {
+				var wave = '{h:' + h + ',v:' + v + ',status:' + $scope.mySeaArray[v][h].status + '}';
+				if (h !== 0 || v !== 0) {
+					mySeaJson += ',';
+				}
+				mySeaJson += wave;
+			}
+		}
+		console.log(mySeaJson);
+		SeabattleService.startGame(mySeaJson);
 		$scope.showEnemySea = true;
 		$scope.showStartButton = false;
 	}
@@ -88,6 +114,7 @@ app.config(['$routeProvider', function($routeProvider) {
 	}
 	
 	$scope.dropped = function(x,y) {
+		$scope.mySeaArray[x][y].status = 2;
         var undraggedElements = document.getElementsByClassName("undragged");
         if (undraggedElements.length === 0) {
           	$scope.showStartButton = true;

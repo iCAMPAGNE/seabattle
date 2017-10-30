@@ -1,9 +1,12 @@
 package com.icampagne.seabattle;
 
+import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.Response;
 
 @Path("/")
 public class RestRequests {
@@ -23,5 +26,14 @@ public class RestRequests {
     	System.out.println(String.format("User '%s' shoots to %d,%d", userId, seaX, seaY));
     	webSocketServer.shoot(userId, seaX, seaY);
         return String.format("User '%s' shoots to %d,%d", userId, seaX, seaY);
+    }
+
+	@POST
+	@Consumes("application/json")
+	@Path("/startGame/{userId}")
+    public Response startGame(String mySea) {
+    	System.out.println(mySea);
+        String result = "OK";
+		return Response.status(201).entity(result ).build();
     }
 }
