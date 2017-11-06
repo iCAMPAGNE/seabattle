@@ -1,7 +1,7 @@
 <div id="mySea" class="sea">
       <table>
         <tr ng-repeat="seaY in mySeaArray" bin="seaY">
-          <td  droppable ng-repeat="seaX in seaY" bin="seaX" class="bin" id="cell-{{seaX.x}}.{{seaX.y}}" ng-class="{1:'splash', 0:'water'}[seaX.status]" drop="dropped(seaX.x, seaX.y)"></td>
+          <td  droppable ng-repeat="seaX in seaY" bin="seaX" class="bin" id="cell-{{seaX.x}}.{{seaX.y}}" ng-class="{0:'water', 1:'splash', 2:'boat', 3:'hit'}[seaX.status]" drop="dropped(seaX.x, seaX.y)"></td>
         </tr>
       </table>
 </div>
@@ -17,7 +17,7 @@
 
 <br>
 <input type="button" id="start" value="START" ng-click="start()" ng-show="showStartButton"></input>
-<div class="item undragged" id="item1" draggable item="item">1</div><br><br>
-<div class="item undragged" id="item2" draggable item="item">2</div><br><br>
-<div class="item undragged" id="item3" draggable item="item">3</div><br><br>
+<div class="item undragged boat" id="item1" draggable item="item">1</div><br><br>
+<div class="item undragged boat" id="item2" draggable item="item">2</div><br><br>
+<div class="item undragged boat" id="item3" draggable item="item">3</div><br><br>
 

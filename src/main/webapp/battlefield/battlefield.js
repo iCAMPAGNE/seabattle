@@ -7,47 +7,42 @@ app.config(['$routeProvider', function($routeProvider) {
     templateUrl: 'battlefield/battlefield.html?dev=' + Math.floor(Math.random() * 100),
     controller: 'BattlefieldCtrl'
   });
-}])
-        .factory('SeabattleService',
-                ['$http', '$rootScope',
-                    function ($http, $rootScope) {
-                        var service = {};
+}]);
+app.service('SeabattleService', ['$http', '$rootScope', function ($http, $rootScope) {
 
-                        service.startGame = function (mySea, callback) {
-                            $http({
-                                method: 'POST',
-                                url: '/Seabattle/rest/startGame/' + $rootScope.userId,
-                                data: mySea
-                            })
-                                    .success(function (response) {
-                                        callback(response);
-                                    }).
-                                    error(function () {
-                                        var result = {error:"Error connecting to host", dataLoading:"false"};
-                                        callback(result);
-                                    });
-                        };
+    this.startGame = function (mySea, callback) {
+        $http({
+            method: 'POST',
+            url: '/Seabattle/rest/startGame/' + $rootScope.userId,
+            data: mySea
+        })
+        .then(function (response) {
+            callback(response);
+        }, function (response) {
+            var result = {error:"Error connecting to host", dataLoading:"false"};
+                callback(result);
+        });
+    };
 
-                        service.shoot = function (seaX, seaY, callback) {
-                            $http({
-                                method: 'GET',
-                                url: '/Seabattle/rest/shoot/' + $rootScope.userId + '?seaX=' + seaX + '&seaY=' + seaY
-                            })
-                                    .success(function (response) {
-                                        callback(response);
-                                    }).
-                                    error(function () {
-                                        var result = {error:"Error connecting to host", dataLoading:"false"};
-                                        callback(result);
-                                    });
-                        };
+    this.shoot = function (seaX, seaY, callback) {
+        $http({
+            method: 'GET',
+            url: '/Seabattle/rest/shoot/' + $rootScope.userId + '?seaX=' + seaX + '&seaY=' + seaY
+        })
+        .then(function (response) {
+                    callback(response);
+        }, function (response) {
+            var result = {error:"Error connecting to host", dataLoading:"false"};
+            callback(result);
+        });
+    };
 
-                        return service;
-                }])
+}]);
 
-.controller('BattlefieldCtrl', ['$rootScope', '$scope', '$compile', 'SeabattleService', function($rootScope, $scope, $compile, SeabattleService) {
+app.controller('BattlefieldCtrl', ['$rootScope', '$scope', '$compile', 'SeabattleService', function($rootScope, $scope, $compile, SeabattleService) {
+	console.log('Controller started');
     $rootScope.userId = Math.floor(100000 * Math.random());
-    console.log($rootScope.userId);
+    console.log(' User ' + $rootScope.userId + ' starts playing');
 	
 	
 	$scope.seaArray = new Array(4);
@@ -70,13 +65,13 @@ app.config(['$routeProvider', function($routeProvider) {
     ws.onopen = function(){  
         console.log("Socket has been opened!");  
         
-        ws.send($rootScope.userId);
+        ws.send($rootScope.userId); // Send id to backend for registering.
     };
     
     ws.onmessage = function(message) {
     	console.log("Socket message received: " + message.data);
     	var shot = JSON.parse(message.data);
-    	$scope.mySeaArray[shot.x][shot.y].status = 1;
+    	$scope.mySeaArray[shot.x][shot.y].status += 1;
     	console.log("schot op " + shot.x + ',' + shot.y);
     	$scope.$apply();
     };
@@ -100,8 +95,15 @@ app.config(['$routeProvider', function($routeProvider) {
 				mySeaJson += wave;
 			}
 		}
+		mySeaJson += ']';
 		console.log(mySeaJson);
-		SeabattleService.startGame(mySeaJson);
+		SeabattleService.startGame(mySeaJson, function(response) {
+			console.log(response);
+			// Started, disable draggable
+			document.querySelector('#item1').removeAttribute('draggable');
+			document.querySelector('#item2').removeAttribute('draggable');
+			document.querySelector('#item3').removeAttribute('draggable');
+		});
 		$scope.showEnemySea = true;
 		$scope.showStartButton = false;
 	}
@@ -203,6 +205,7 @@ app.directive('droppable', function() {
           var binId = this.id;
           var item = document.getElementById(e.dataTransfer.getData('Text'));
           item.classList.remove('undragged');
+          item.classList.remove('boat');
           this.appendChild(item);
 
           

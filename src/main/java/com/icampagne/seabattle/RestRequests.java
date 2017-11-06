@@ -23,9 +23,9 @@ public class RestRequests {
 	@GET
     @Path("/shoot/{userId}")
     public String shoot(@PathParam("userId") String userId, @QueryParam("seaX") int seaX, @QueryParam("seaY") int seaY) {
-    	System.out.println(String.format("User '%s' shoots to %d,%d", userId, seaX, seaY));
+    	System.out.println(String.format("User '%s' shoots at %d,%d", userId, seaX, seaY));
     	webSocketServer.shoot(userId, seaX, seaY);
-        return String.format("User '%s' shoots to %d,%d", userId, seaX, seaY);
+        return String.format("User '%s' shoots at %d,%d", userId, seaX, seaY);
     }
 
 	@POST
