@@ -85,6 +85,16 @@ app.controller('BattlefieldCtrl', ['$rootScope', '$scope', '$compile', 'Seabattl
 		  }
 	
 	$scope.start = function() {
+		var item1_xy = document.querySelector('#item1').parentNode.id.substring(5).split(".");
+		$scope.mySeaArray[parseInt(item1_xy[1])][parseInt(item1_xy[0])].status = 2;
+		document.querySelector('#item1').remove();
+		var item2_xy = document.querySelector('#item2').parentNode.id.substring(5).split(".");
+		$scope.mySeaArray[parseInt(item2_xy[1])][parseInt(item2_xy[0])].status = 2;
+		document.querySelector('#item2').remove();
+		var item3_xy = document.querySelector('#item3').parentNode.id.substring(5).split(".");
+		$scope.mySeaArray[parseInt(item3_xy[1])][parseInt(item3_xy[0])].status = 2;
+		document.querySelector('#item3').remove();
+		
 		var mySeaJson = '[';
 		for (var v = 0; v < $scope.mySeaArray.length; v++) {
 			for (var h = 0; h < $scope.mySeaArray[v].length; h++) {
@@ -99,10 +109,12 @@ app.controller('BattlefieldCtrl', ['$rootScope', '$scope', '$compile', 'Seabattl
 		console.log(mySeaJson);
 		SeabattleService.startGame(mySeaJson, function(response) {
 			console.log(response);
-			// Started, disable draggable
-			document.querySelector('#item1').removeAttribute('draggable');
-			document.querySelector('#item2').removeAttribute('draggable');
-			document.querySelector('#item3').removeAttribute('draggable');
+			
+			var cells = document.querySelectorAll('.seacell');
+			console.log(`  !!!  cells: ${cells.length}`);
+			[].forEach.call(cells, function(cell) {
+				  cell.removeAttribute('draggable');
+				});
 		});
 		$scope.showEnemySea = true;
 		$scope.showStartButton = false;
@@ -116,7 +128,7 @@ app.controller('BattlefieldCtrl', ['$rootScope', '$scope', '$compile', 'Seabattl
 	}
 	
 	$scope.dropped = function(x,y) {
-		$scope.mySeaArray[x][y].status = 2;
+		//$scope.mySeaArray[x][y].status = 2;
         var undraggedElements = document.getElementsByClassName("undragged");
         if (undraggedElements.length === 0) {
           	$scope.showStartButton = true;
@@ -197,6 +209,7 @@ app.directive('droppable', function() {
       el.addEventListener(
         'drop',
         function(e) {
+        	console.log(`   !!! DROPPP `);
           // Stops some browsers from redirecting.
           if (e.stopPropagation) e.stopPropagation();
           
@@ -205,7 +218,6 @@ app.directive('droppable', function() {
           var binId = this.id;
           var item = document.getElementById(e.dataTransfer.getData('Text'));
           item.classList.remove('undragged');
-          item.classList.remove('boat');
           this.appendChild(item);
 
           
