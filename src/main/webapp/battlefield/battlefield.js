@@ -10,10 +10,10 @@ app.config(['$routeProvider', function($routeProvider) {
 }]);
 app.service('SeabattleService', ['$http', '$rootScope', function ($http, $rootScope) {
 
-    this.startGame = function (mySea, callback) {
+    this.inGame = function (mySea, callback) {
         $http({
             method: 'POST',
-            url: '/Seabattle/rest/startGame/' + $rootScope.userId,
+            url: '/Seabattle/rest/inGame/' + $rootScope.userId,
             data: mySea
         })
         .then(function (response) {
@@ -43,6 +43,7 @@ app.controller('BattlefieldCtrl', ['$rootScope', '$scope', '$compile', 'Seabattl
 	console.log('Controller started');
     $rootScope.userId = Math.floor(100000 * Math.random());
     console.log(' User ' + $rootScope.userId + ' starts playing');
+    $scope.status = 'PLACE_SHIPS';
 	
 	
 	$scope.seaArray = new Array(4);
@@ -60,7 +61,7 @@ app.controller('BattlefieldCtrl', ['$rootScope', '$scope', '$compile', 'Seabattl
 			$scope.mySeaArray[v][h] = { status: 0, x:v, y:h};
 		}
 	}
-    
+
     var ws = new WebSocket("ws://localhost:8080/Seabattle/socket");
     ws.onopen = function(){  
         console.log("Socket has been opened!");  
@@ -70,15 +71,20 @@ app.controller('BattlefieldCtrl', ['$rootScope', '$scope', '$compile', 'Seabattl
     
     ws.onmessage = function(message) {
     	console.log("Socket message received: " + message.data);
-    	var shot = JSON.parse(message.data);
-    	$scope.mySeaArray[shot.x][shot.y].status += 1;
-    	console.log("schot op " + shot.x + ',' + shot.y);
-    	$scope.$apply();
+    	var content = JSON.parse(message.data);
+    	if (content.command == 'shoot') {
+        	var shot = content.shot;
+          	$scope.mySeaArray[shot.x][shot.y].status += 1;
+           	console.log("schot op " + shot.x + ',' + shot.y);
+    	}
+    	if (content.command == 'enemyStatus') {
+    		$scope.enemyStatus = content.state;
+    	}
+    	if (content.command == 'status') {
+    		$scope.status = content.state;
+    	}
+       	$scope.$apply();
     };
-	
-	
-	$scope.showStartButton = false;
-	$scope.showEnemySea = false;
 	
 	$scope.handleDrop = function(item, bin) {
 		    console.log('Item ' + item + ' has been dropped into ' + bin);
@@ -98,7 +104,7 @@ app.controller('BattlefieldCtrl', ['$rootScope', '$scope', '$compile', 'Seabattl
 		var mySeaJson = '[';
 		for (var v = 0; v < $scope.mySeaArray.length; v++) {
 			for (var h = 0; h < $scope.mySeaArray[v].length; h++) {
-				var wave = '{h:' + h + ',v:' + v + ',status:' + $scope.mySeaArray[v][h].status + '}';
+				var wave = '{"h":"' + h + '","v":"' + v + '","status":"' + $scope.mySeaArray[h][v].status + '"}';
 				if (h !== 0 || v !== 0) {
 					mySeaJson += ',';
 				}
@@ -107,7 +113,7 @@ app.controller('BattlefieldCtrl', ['$rootScope', '$scope', '$compile', 'Seabattl
 		}
 		mySeaJson += ']';
 		console.log(mySeaJson);
-		SeabattleService.startGame(mySeaJson, function(response) {
+		SeabattleService.inGame(mySeaJson, function(response) {
 			console.log(response);
 			
 			var cells = document.querySelectorAll('.seacell');
@@ -116,22 +122,23 @@ app.controller('BattlefieldCtrl', ['$rootScope', '$scope', '$compile', 'Seabattl
 				  cell.removeAttribute('draggable');
 				});
 		});
-		$scope.showEnemySea = true;
-		$scope.showStartButton = false;
+	    $scope.status = 'IN_GAME';
 	}
 	
 	$scope.shoot = function(x,y) {
-		SeabattleService.shoot(x,y, function (response) {
-	    	$scope.seaArray[x][y].status = 1;
-			console.log('Response: ' + response);
-		});
+		if ($scope.status == 'SHOOTING') {
+			SeabattleService.shoot(x,y, function (response) {
+		    	$scope.seaArray[x][y].status = 1;
+				console.log('Response: ' + response);
+			});
+		}
 	}
 	
 	$scope.dropped = function(x,y) {
 		//$scope.mySeaArray[x][y].status = 2;
         var undraggedElements = document.getElementsByClassName("undragged");
         if (undraggedElements.length === 0) {
-          	$scope.showStartButton = true;
+            $scope.status = 'REPLACE_SHIPS';
           }
 	}
 

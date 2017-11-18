@@ -1,3 +1,14 @@
+<div class="instructions">
+    <p ng-show="status == 'PLACE_SHIPS'">Plaats uw schepen in de zee.</p>
+    <p ng-show="status == 'REPLACE_SHIPS'">
+        U kunt uw schepen nog verschuiven.<br>
+        Als u alle schepen definitief hebt geplaatst, druk dan op start. Daarna kunt u ze niet meer verplaatsen.
+    </p>
+    <p ng-show="status == 'IN_GAME' && enemyStatus != 'IN_GAME'">Wacht tot de tegenstander ook haar/zijn schepen heeft geplaatst.</p>
+    <p ng-show="status == 'SHOOTING'">U mag drie schoten lossen naar de vijand.</p>
+    <p ng-show="status == 'SHOOTED'">De vijand mag drie schoten lossen in uw gebied.</p>
+</div>
+
 <div id="mySea" class="sea">
       <table>
         <tr ng-repeat="seaY in mySeaArray" bin="seaY">
@@ -6,7 +17,7 @@
       </table>
 </div>
 
-<div id="enemySea" class="sea" ng-show="showEnemySea">
+<div id="enemySea" class="sea" ng-show="status == 'SHOOTING' || status == 'SHOOTED'">
       <table>
         <tr ng-repeat="seaY in seaArray" bin="seaY">
           <td ng-repeat="seaX in seaY" bin="seaX" class="bin" ng-class="{1:'splash', 0:'water'}[seaX.status]" ng-click="shoot(seaX.x,seaX.y)"></td>
@@ -16,7 +27,7 @@
 
 
 <br>
-<input type="button" id="start" value="START" ng-click="start()" ng-show="showStartButton"></input>
+<input type="button" id="start" value="START" ng-click="start()" ng-show="status == 'REPLACE_SHIPS'"></input>
 <div class="item undragged boat" id="item1" draggable item="item">1</div><br><br>
 <div class="item undragged boat" id="item2" draggable item="item">2</div><br><br>
 <div class="item undragged boat" id="item3" draggable item="item">3</div><br><br>

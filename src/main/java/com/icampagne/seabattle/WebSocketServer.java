@@ -12,19 +12,45 @@ import javax.websocket.OnOpen;
 import javax.websocket.Session;
 import javax.websocket.server.ServerEndpoint;
 
+import com.icampagne.seabattle.Player.PlayerState;
+
 @ServerEndpoint("/socket")
 public class WebSocketServer {
 
 	// All open WebSocket sessions of players
     static Set<Session> players = Collections.synchronizedSet(new HashSet<Session>());
     static Session playerSession[] = new Session[2];
-    static String userId[] = new String[2];
+    static Player player[] = new Player[2];
+    
+    public void inGame(String id) {
+    	
+		int i = id.equals(player[0].getUserId()) ? 0 : 1;
+		
+		try {
+			if (player[1 - i].getPlayerState().equals(PlayerState.IN_GAME)) {
+				player[i].setPlayerState(PlayerState.SHOOTED);
+				System.out.println("Send SHOOTED to " + i);
+				playerSession[i].getBasicRemote().sendText("{\"command\":\"status\", \"state\":\"SHOOTED\"}");
+				player[1-i].setPlayerState(PlayerState.SHOOTING);
+				playerSession[1-i].getBasicRemote().sendText("{\"command\":\"status\", \"state\":\"SHOOTING\"}");
+				System.out.println("Send SHOOTING to " + (1-i));
+			} else {
+				player[i].setPlayerState(PlayerState.IN_GAME);
+				playerSession[1-i].getBasicRemote().sendText("{\"command\":\"enemyStatus\", \"state\":\"IN_GAME\"}");
+				System.out.println("Send IN_GAME to " + (1-i));
+			}
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+    }
     
     public void shoot(String id, int x, int y) {
     	
-		int i = id.equals(userId[0]) ? 1 : 0;
+		int i = id.equals(player[0].getUserId()) ? 0 : 1;
     	try {
-			playerSession[i].getBasicRemote().sendText("{\"x\":\"" + x + "\", \"y\":\"" + y + "\", \"status\":\"1\"}");
+			playerSession[1-i].getBasicRemote().sendText("{\"command\":\"shoot\", \"shot\":{\"x\":\"" + x + "\", \"y\":\"" + y + "\", \"status\":\"1\"}}");
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -58,6 +84,6 @@ public class WebSocketServer {
        public void handleMessage(String message, Session session) {
 		System.out.println("Websocket OnMessage: " + message);
 		int i = session.getId().equals(playerSession[0].getId()) ? 0 : 1;
-		userId[i] = message;
+		player[i] = new Player(message);
    }
 }

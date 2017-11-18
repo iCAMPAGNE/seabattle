@@ -3,6 +3,10 @@
   text-align: center;
   margin: 0 1px;
 }
+
+.instructions {
+	height: 3em;
+}
 .bin {
   @extend %content;
   height: 30px;
