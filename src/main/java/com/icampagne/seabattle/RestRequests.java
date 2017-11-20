@@ -1,8 +1,6 @@
 package com.icampagne.seabattle;
 
 import java.io.IOException;
-import java.util.Map;
-import java.util.TreeMap;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -20,24 +18,25 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public class RestRequests {
 
     private static WebSocketServer webSocketServer = new WebSocketServer();
-    
-    private static Map<String, int[][]> playerSeaMap = new TreeMap<String, int[][]>();
 
 	@GET
 	@Path("/version")
     public String getMsg()
     {
-         return "Seabattle 0.0.3";
+         return "Seabattle 0.0.4";
     }
 
 	@GET
     @Path("/shoot/{userId}")
-    public String shoot(@PathParam("userId") String userId, @QueryParam("seaX") int seaX, @QueryParam("seaY") int seaY) {
+    public Response shoot(@PathParam("userId") String userId, @QueryParam("seaX") int seaX, @QueryParam("seaY") int seaY) {
     	System.out.println(String.format("User '%s' shoots at %d,%d", userId, seaX, seaY));
-    	int[][] sea = playerSeaMap.get(userId);
-    	System.out.println(String.format("User '%s' shoots at %d,%d; status = %d", userId, seaX, seaY, sea[seaX][seaY]));
+    	int[][] sea = Player.getSeaOfPlayer(userId);
+    	Player player = Player.getPlayer(userId);
+    	int status = Player.getSeaOfPlayer(player.getEnemyId())[seaX][seaY];
+    	System.out.println(String.format("User '%s' shoots at %d,%d; status = %d", userId, seaX, seaY, status));
     	webSocketServer.shoot(userId, seaX, seaY);
-        return String.format("User '%s' shoots at %d,%d", userId, seaX, seaY);
+    	String result = "{\"status\":\"" + status + "\"}";
+		return Response.status(201).entity(result ).build();
     }
 
 	@POST
@@ -52,8 +51,7 @@ public class RestRequests {
 			for (Sea s : sea) {
 				seaSpot[s.getH()][s.getV()] = s.getStatus();
 			}
-			playerSeaMap.put(userId, seaSpot);
-			System.out.println(userId + " playerSeas: " + playerSeaMap.size());
+			Player.addPlayer(userId, seaSpot);
 		} catch (JsonParseException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

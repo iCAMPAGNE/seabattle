@@ -20,7 +20,7 @@
 <div id="enemySea" class="sea" ng-show="status == 'SHOOTING' || status == 'SHOOTED'">
       <table>
         <tr ng-repeat="seaY in seaArray" bin="seaY">
-          <td ng-repeat="seaX in seaY" bin="seaX" class="bin" ng-class="{1:'splash', 0:'water'}[seaX.status]" ng-click="shoot(seaX.x,seaX.y)"></td>
+          <td ng-repeat="seaX in seaY" bin="seaX" class="bin" ng-class="{0:'water', 1:'splash', 2:'boat', 3:'hit'}[seaX.status]" ng-click="shoot(seaX.x,seaX.y)"></td>
         </tr>
       </table>
 </div>

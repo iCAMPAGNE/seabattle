@@ -128,8 +128,8 @@ app.controller('BattlefieldCtrl', ['$rootScope', '$scope', '$compile', 'Seabattl
 	$scope.shoot = function(x,y) {
 		if ($scope.status == 'SHOOTING') {
 			SeabattleService.shoot(x,y, function (response) {
-		    	$scope.seaArray[x][y].status = 1;
-				console.log('Response: ' + response);
+		    	$scope.seaArray[x][y].status = parseInt(response.data.status) + 1;
+				console.log(response.data.status + ', response: ' + JSON.stringify(response));
 			});
 		}
 	}
