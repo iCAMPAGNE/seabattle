@@ -30,9 +30,8 @@ public class RestRequests {
     @Path("/shoot/{userId}")
     public Response shoot(@PathParam("userId") String userId, @QueryParam("seaX") int seaX, @QueryParam("seaY") int seaY) {
     	System.out.println(String.format("User '%s' shoots at %d,%d", userId, seaX, seaY));
-    	int[][] sea = Player.getSeaOfPlayer(userId);
-    	Player player = Player.getPlayer(userId);
-    	int status = Player.getSeaOfPlayer(player.getEnemyId())[seaX][seaY];
+    	Player player = Player.getPlayerByUserId(userId);
+    	int status = Player.getPlayerBySessionId(player.getEnemySession().getId()).getSea()[seaX][seaY];
     	System.out.println(String.format("User '%s' shoots at %d,%d; status = %d", userId, seaX, seaY, status));
     	webSocketServer.shoot(userId, seaX, seaY);
     	String result = "{\"status\":\"" + status + "\"}";
@@ -51,7 +50,8 @@ public class RestRequests {
 			for (Sea s : sea) {
 				seaSpot[s.getH()][s.getV()] = s.getStatus();
 			}
-			Player.addPlayer(userId, seaSpot);
+			System.out.println("inGame userId = " + userId + ", player = " + Player.getPlayerByUserId(userId));
+			Player.getPlayerByUserId(userId).setSea(seaSpot);
 		} catch (JsonParseException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

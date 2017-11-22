@@ -1,16 +1,21 @@
 package com.icampagne.seabattle;
 
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.Optional;
+import java.util.Set;
+import java.util.HashSet;
+
+import javax.websocket.Session;
+
 
 public class Player {
     
     public enum PlayerState { PREPARING, IN_GAME, SHOOTING, SHOOTED };
     
-    private static Map<String, Player> playerMap = new TreeMap<String, Player>();
+    private static Set<Player> playersSet = new HashSet<Player>();
 
 	private String userId;
-	private String enemyId;
+	private Session playerSession;
+	private Session enemySession;
 	private PlayerState playerState;
 	private int[][] sea;
 
@@ -18,9 +23,9 @@ public class Player {
     	playerState = PlayerState.PREPARING;
     }
 
-    public Player(String userId) {
+    public Player(Session playerSession) {
     	playerState = PlayerState.PREPARING;
-    	this.userId = userId;
+    	this.playerSession = playerSession;
     }
 
 	public String getUserId() {
@@ -31,12 +36,20 @@ public class Player {
 		this.userId = userId;
 	}
 
-	public String getEnemyId() {
-		return enemyId;
+	public Session getEnemySession() {
+		return enemySession;
 	}
 
-	public void setEnemyId(String enemyId) {
-		this.enemyId = enemyId;
+	public void setEnemySession(Session enemySession) {
+		this.enemySession = enemySession;
+	}
+
+	public Session getPlayerSession() {
+		return playerSession;
+	}
+
+	public void setPlayerSession(Session playerSession) {
+		this.playerSession = playerSession;
 	}
 
 	public PlayerState getPlayerState() {
@@ -56,26 +69,37 @@ public class Player {
 	}
 
 	public static int[][] getSeaOfPlayer(String userId) {
-		return playerMap.get(userId).getSea();
+		return getPlayerByUserId(userId).getSea();
 	}
 
-	public static void addPlayer(String userId, int[][] sea) {
-		Player player = new Player(userId);
-		player.setSea(sea);
-		if (!playerMap.isEmpty()) {
-			if (playerMap.size() >= 2) {
-				playerMap.clear();
+	public static void addPlayer(Session session) {
+		Player player = new Player(session);
+		if (!playersSet.isEmpty()) {
+			if (playersSet.size() >= 2) {
+				playersSet.clear();
 			} else {
-				String enemyId = (String) playerMap.keySet().toArray()[0];
-				Player enemy = playerMap.get(enemyId);
-				enemy.setEnemyId(userId);
-				player.setEnemyId(enemyId);
+				Optional<Player> enemyPlayerOptional = playersSet.stream().findFirst();
+				Player enemyPlayer = enemyPlayerOptional.get();
+				enemyPlayer.setEnemySession(session);
+				player.setEnemySession(enemyPlayer.getPlayerSession());
 			}
 		}
-		playerMap.put(userId, player);
+		playersSet.add(player);
+	}
+
+	public static Player getPlayerBySessionId(String sessionId) {
+		Optional<Player> optionalPlayer = playersSet.stream().filter(player -> sessionId.equals(player.playerSession.getId())).findFirst();
+		return optionalPlayer.isPresent() ? optionalPlayer.get() : null;
+	}
+
+	public static Player getPlayerByUserId(String userId) {
+		Optional<Player> optionalPlayer = playersSet.stream().filter(player -> userId.equals(player.getUserId())).findFirst();
+		return optionalPlayer.isPresent() ? optionalPlayer.get() : null;
 	}
 	
-	public static Player getPlayer(String userId) {
-		return playerMap.get(userId);
+	public static boolean removePlayer(Session session) {
+		System.out.println(session.getId() + "  " + Player.getPlayerBySessionId(session.getId()));
+		Player player = Player.getPlayerBySessionId(session.getId());
+		return player != null && playersSet.contains(player) ? playersSet.remove(player) : false;
 	}
 }
