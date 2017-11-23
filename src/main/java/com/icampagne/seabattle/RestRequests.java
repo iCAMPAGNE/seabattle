@@ -1,7 +1,5 @@
 package com.icampagne.seabattle;
 
-import java.io.IOException;
-
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -10,14 +8,10 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
 
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 @Path("/")
 public class RestRequests {
-
-    private static WebSocketServer webSocketServer = new WebSocketServer();
+	
+	private static Play play = new Play();
 
 	@GET
 	@Path("/version")
@@ -29,11 +23,7 @@ public class RestRequests {
 	@GET
     @Path("/shoot/{userId}")
     public Response shoot(@PathParam("userId") String userId, @QueryParam("seaX") int seaX, @QueryParam("seaY") int seaY) {
-    	System.out.println(String.format("User '%s' shoots at %d,%d", userId, seaX, seaY));
-    	Player player = Player.getPlayerByUserId(userId);
-    	int status = Player.getPlayerBySessionId(player.getEnemySession().getId()).getSea()[seaX][seaY];
-    	System.out.println(String.format("User '%s' shoots at %d,%d; status = %d", userId, seaX, seaY, status));
-    	webSocketServer.shoot(userId, seaX, seaY);
+    	int status = play.shoot(userId, seaX, seaY);
     	String result = "{\"status\":\"" + status + "\"}";
 		return Response.status(201).entity(result ).build();
     }
@@ -42,27 +32,7 @@ public class RestRequests {
 	@Consumes("application/json")
 	@Path("/inGame/{userId}")
     public Response inGame(@PathParam("userId") String userId, String mySea) {
-    	System.out.println(mySea);
-    	ObjectMapper mapper = new ObjectMapper();
-    	try {
-			Sea[] sea = mapper.readValue(mySea, Sea[].class);
-			int seaSpot[][] = new int[4][4];
-			for (Sea s : sea) {
-				seaSpot[s.getH()][s.getV()] = s.getStatus();
-			}
-			System.out.println("inGame userId = " + userId + ", player = " + Player.getPlayerByUserId(userId));
-			Player.getPlayerByUserId(userId).setSea(seaSpot);
-		} catch (JsonParseException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (JsonMappingException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-    	webSocketServer.inGame(userId);
+    	play.inGame(userId, mySea);
         String result = "OK";
 		return Response.status(201).entity(result ).build();
     }

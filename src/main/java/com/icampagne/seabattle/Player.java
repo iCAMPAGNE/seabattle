@@ -9,7 +9,7 @@ import javax.websocket.Session;
 
 public class Player {
     
-    public enum PlayerState { PREPARING, IN_GAME, SHOOTING, SHOOTED };
+    public enum PlayerState { PREPARING, IN_GAME, SHOOTING, SHOOTED, WON, LOST };
     
     private static Set<Player> playersSet = new HashSet<Player>();
 
@@ -18,6 +18,7 @@ public class Player {
 	private Session enemySession;
 	private PlayerState playerState;
 	private int[][] sea;
+	private int shotNumber;
 
     public Player() {
     	playerState = PlayerState.PREPARING;
@@ -66,6 +67,14 @@ public class Player {
 
 	public void setSea(int[][] sea) {
 		this.sea = sea;
+	}
+
+	public int getShotNumber() {
+		return shotNumber;
+	}
+
+	public void setShotNumber(int shotNumber) {
+		this.shotNumber = shotNumber;
 	}
 
 	public static int[][] getSeaOfPlayer(String userId) {

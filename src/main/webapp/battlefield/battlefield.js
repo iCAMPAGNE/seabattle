@@ -74,7 +74,7 @@ app.controller('BattlefieldCtrl', ['$rootScope', '$scope', '$compile', 'Seabattl
     	var content = JSON.parse(message.data);
     	if (content.command == 'shoot') {
         	var shot = content.shot;
-          	$scope.mySeaArray[shot.x][shot.y].status += 1;
+          	$scope.mySeaArray[shot.x][shot.y].status = shot.status;
            	console.log("schot op " + shot.x + ',' + shot.y);
     	}
     	if (content.command == 'enemyStatus') {
@@ -128,7 +128,7 @@ app.controller('BattlefieldCtrl', ['$rootScope', '$scope', '$compile', 'Seabattl
 	$scope.shoot = function(x,y) {
 		if ($scope.status == 'SHOOTING') {
 			SeabattleService.shoot(x,y, function (response) {
-		    	$scope.seaArray[x][y].status = parseInt(response.data.status) + 1;
+		    	$scope.seaArray[x][y].status = parseInt(response.data.status);
 				console.log(response.data.status + ', response: ' + JSON.stringify(response));
 			});
 		}
@@ -216,7 +216,6 @@ app.directive('droppable', function() {
       el.addEventListener(
         'drop',
         function(e) {
-        	console.log(`   !!! DROPPP `);
           // Stops some browsers from redirecting.
           if (e.stopPropagation) e.stopPropagation();
           

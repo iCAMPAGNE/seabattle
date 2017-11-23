@@ -7,6 +7,8 @@
     <p ng-show="status == 'IN_GAME' && enemyStatus != 'IN_GAME'">Wacht tot de tegenstander ook haar/zijn schepen heeft geplaatst.</p>
     <p ng-show="status == 'SHOOTING'">U mag drie schoten lossen naar de vijand.</p>
     <p ng-show="status == 'SHOOTED'">De vijand mag drie schoten lossen in uw gebied.</p>
+    <p ng-show="status == 'WON'">U heeft gewonnen!! Alle schepen van de vijand zijn verwoest.</p>
+    <p ng-show="status == 'LOST'">U heeft verloren!! Al uw schepen zijn verwoest.</p>
 </div>
 
 <div id="mySea" class="sea">
@@ -17,7 +19,7 @@
       </table>
 </div>
 
-<div id="enemySea" class="sea" ng-show="status == 'SHOOTING' || status == 'SHOOTED'">
+<div id="enemySea" class="sea" ng-show="status == 'SHOOTING' || status == 'SHOOTED' || status == 'WON' || status == 'LOST'">
       <table>
         <tr ng-repeat="seaY in seaArray" bin="seaY">
           <td ng-repeat="seaX in seaY" bin="seaX" class="bin" ng-class="{0:'water', 1:'splash', 2:'boat', 3:'hit'}[seaX.status]" ng-click="shoot(seaX.x,seaX.y)"></td>

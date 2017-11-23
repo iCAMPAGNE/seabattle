@@ -1,9 +1,6 @@
 package com.icampagne.seabattle;
 
 import java.io.IOException;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
 
 import javax.websocket.OnClose;
 import javax.websocket.OnError;
@@ -12,51 +9,38 @@ import javax.websocket.OnOpen;
 import javax.websocket.Session;
 import javax.websocket.server.ServerEndpoint;
 
-import com.icampagne.seabattle.Player.PlayerState;
-
 @ServerEndpoint("/socket")
 public class WebSocketServer {
 
-	// All open WebSocket sessions of players
-//    static Set<Session> players = Collections.synchronizedSet(new HashSet<Session>());
-//    static Session playerSession[] = new Session[2];
-//    static Player player[] = new Player[2];
-    
-    public void inGame(String id) {
-    	
-		Player player = Player.getPlayerByUserId(id);
-		Player enemy = Player.getPlayerBySessionId(player.getEnemySession().getId());
-		
-		try {
-			if (enemy.getPlayerState().equals(PlayerState.IN_GAME)) {
-				player.setPlayerState(PlayerState.SHOOTED);
-				System.out.println("Send SHOOTED to " + player.getUserId());
-				player.getPlayerSession().getBasicRemote().sendText("{\"command\":\"status\", \"state\":\"SHOOTED\"}");
-				enemy.setPlayerState(PlayerState.SHOOTING);
-				player.getEnemySession().getBasicRemote().sendText("{\"command\":\"status\", \"state\":\"SHOOTING\"}");
-				System.out.println("Send SHOOTING to " + enemy.getUserId());
-			} else {
-				player.setPlayerState(PlayerState.IN_GAME);
-				enemy.getPlayerSession().getBasicRemote().sendText("{\"command\":\"enemyStatus\", \"state\":\"IN_GAME\"}");
-				System.out.println("Send IN_GAME to " + enemy.getUserId());
-			}
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		
+    public boolean inGame(Session session) {
+    	return sendStatus(session, "IN_GAME");
+    }
+
+    public boolean shooting(Session session) {
+    	return sendStatus(session, "SHOOTING");
     }
     
-    public void shoot(String id, int x, int y) {
-    	
-		Player player = Player.getPlayerByUserId(id);
-		System.out.println("shoot from " + player.getPlayerSession().getId() + " to " + player.getEnemySession().getId());
+    public boolean shooted(Session session) {
+    	return sendStatus(session, "SHOOTED");
+    }
+    
+    public boolean sendStatus(Session session, String status) {
+    	System.out.println("Sending status " + status + " to player " + session.getId());
+    	return sendMessage(session, String.format("{'command':'status', 'state':'%s'}", status));
+    }
+    
+    public boolean sendMessage(Session session, String message) {
+    	if (message == null) {
+    		return false;
+    	}
+    	String text = message.replace('\'', '"');
     	try {
-			player.getEnemySession().getBasicRemote().sendText("{\"command\":\"shoot\", \"shot\":{\"x\":\"" + x + "\", \"y\":\"" + y + "\", \"status\":\"1\"}}");
+			session.getBasicRemote().sendText(text);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
+			return false;
 		}
+    	return true;
     }
 
 	@OnOpen
@@ -66,7 +50,7 @@ public class WebSocketServer {
     }
 
     @OnClose
-        public void close(Session session) {
+    public void close(Session session) {
 		System.out.println("Websocket OnClose session " + session.getId());
 		if (Player.getPlayerBySessionId(session.getId()) != null && Player.getPlayerBySessionId(session.getId()).getEnemySession() != null) {
 			Player.removePlayer(Player.getPlayerBySessionId(session.getId()).getEnemySession());
@@ -75,7 +59,7 @@ public class WebSocketServer {
     }
 
     @OnError
-        public void onError(Throwable error) {
+    public void onError(Throwable error) {
 		System.out.println("Websocket OnError: " + error.getMessage());
     }
 
