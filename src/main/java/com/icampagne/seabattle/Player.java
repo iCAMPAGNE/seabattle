@@ -97,13 +97,23 @@ public class Player {
 	}
 
 	public static Player getPlayerBySessionId(String sessionId) {
-		Optional<Player> optionalPlayer = playersSet.stream().filter(player -> sessionId.equals(player.playerSession.getId())).findFirst();
-		return optionalPlayer.isPresent() ? optionalPlayer.get() : null;
+		//Optional<Player> optionalPlayer = playersSet.stream().filter(player -> sessionId.equals(player.playerSession.getId())).findFirst();
+		//return optionalPlayer.isPresent() ? optionalPlayer.get() : null;
+		for (Player player : playersSet) {
+			if (sessionId.equals(player.getPlayerSession().getId()))
+				return player;
+		}
+		return null;
 	}
 
 	public static Player getPlayerByUserId(String userId) {
-		Optional<Player> optionalPlayer = playersSet.stream().filter(player -> userId.equals(player.getUserId())).findFirst();
-		return optionalPlayer.isPresent() ? optionalPlayer.get() : null;
+		//Optional<Player> optionalPlayer = playersSet.stream().filter(player -> userId.equals(player.getUserId())).findFirst();
+		//return optionalPlayer.isPresent() ? optionalPlayer.get() : null;
+		for (Player player : playersSet) {
+			if (userId.equals(player.getUserId()))
+				return player;
+		}
+		return null;
 	}
 	
 	public static boolean removePlayer(Session session) {
